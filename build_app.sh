@@ -1,11 +1,32 @@
 #!/bin/zsh
-# Build mikocokWord.app and mikocokExcel.app (one binary, two launchers) and
-# install them to ~/Applications. Pass --default to make them the default
-# apps for .docx / .xlsx.
+# Build mikocokWord.app and mikocokExcel.app (one binary, two launchers) into
+# dist/ and install them to ~/Applications.
+#   --default     make them the default apps for .docx / .xlsx
+#   --universal   build for Apple Silicon + Intel (used for the DMG)
+#   --no-install  only build into dist/, don't touch ~/Applications
 set -euo pipefail
 cd "${0:A:h}"
-cargo build --release
+DEFAULT=0 UNIVERSAL=0 INSTALL=1
+for a in "$@"; do
+  case $a in
+    --default) DEFAULT=1 ;;
+    --universal) UNIVERSAL=1 ;;
+    --no-install) INSTALL=0 ;;
+    *) echo "unknown option: $a" >&2; exit 1 ;;
+  esac
+done
+
 rm -rf dist && mkdir dist
+if (( UNIVERSAL )); then
+  rustup target add aarch64-apple-darwin x86_64-apple-darwin >/dev/null
+  cargo build --release --target aarch64-apple-darwin
+  cargo build --release --target x86_64-apple-darwin
+  BIN="$PWD/dist/mikocok-universal"
+  lipo -create -output "$BIN" target/aarch64-apple-darwin/release/mikocok target/x86_64-apple-darwin/release/mikocok
+else
+  cargo build --release
+  BIN="$PWD/target/release/mikocok"
+fi
 LSREG=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
 
 build() {  # flavor  type-name  extension  uti
@@ -21,7 +42,7 @@ on open theFiles
 	end repeat
 end open
 AS
-  cp target/release/mikocok "$app/Contents/Resources/mikocok"
+  cp "$BIN" "$app/Contents/Resources/mikocok"
   python3 - "$app/Contents/Info.plist" "$name" "$flavor" "$typename" "$ext" "$uti" <<'PY'
 import plistlib, sys
 p, name, flavor, typename, ext, uti = sys.argv[1:]
@@ -38,15 +59,19 @@ d.update({
 plistlib.dump(d, open(p, "wb"))
 PY
   codesign --force --deep -s - "$app"
-  mkdir -p ~/Applications && rm -rf ~/Applications/$name.app && cp -R "$app" ~/Applications/
-  $LSREG -f ~/Applications/$name.app
-  echo "Installed: ~/Applications/$name.app ($(du -sh ~/Applications/$name.app | cut -f1))"
+  if (( INSTALL )); then
+    mkdir -p ~/Applications && rm -rf ~/Applications/$name.app && cp -R "$app" ~/Applications/
+    $LSREG -f ~/Applications/$name.app
+    echo "Installed: ~/Applications/$name.app ($(du -sh ~/Applications/$name.app | cut -f1))"
+  else
+    echo "Built: dist/$name.app ($(du -sh "$app" | cut -f1))"
+  fi
 }
 
 build Word  "Word Document"  docx org.openxmlformats.wordprocessingml.document
 build Excel "Excel Workbook" xlsx org.openxmlformats.spreadsheetml.sheet
 
-if [[ "${1:-}" == "--default" ]]; then
+if (( DEFAULT && INSTALL )); then
   swift - <<'SW'
 import Foundation
 import CoreServices

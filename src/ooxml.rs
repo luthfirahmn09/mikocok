@@ -24,7 +24,7 @@ impl Package {
             }
             total += f.size();
             if total > MAX_TOTAL {
-                return Err("file terlalu besar".into());
+                return Err("file is too large".into());
             }
             let mut buf = Vec::with_capacity(f.size() as usize);
             f.read_to_end(&mut buf).map_err(|e| e.to_string())?;

@@ -63,7 +63,7 @@ impl App {
             match path.extension().and_then(|e| e.to_str()).map(str::to_lowercase).as_deref() {
                 Some("docx") => docx::Docx::open(&bytes).map(Doc::Word),
                 Some("xlsx") | Some("xlsm") => xlsx::Xlsx::open(&bytes).map(Doc::Excel),
-                _ => Err("hanya mendukung .docx dan .xlsx".into()),
+                _ => Err("only .docx and .xlsx files are supported".into()),
             }
         });
         match result {
@@ -72,9 +72,9 @@ impl App {
                 self.path = Some(path.to_path_buf());
                 self.sheet = 0;
                 self.selected = None;
-                self.status = format!("Dibuka: {}", path.display());
+                self.status = format!("Opened: {}", path.display());
             }
-            Err(e) => self.status = format!("Gagal membuka: {e}"),
+            Err(e) => self.status = format!("Could not open: {e}"),
         }
     }
 
@@ -114,9 +114,9 @@ impl App {
                     Some(Doc::Excel(x)) => x.sheets.len() - 1,
                     _ => 0,
                 });
-                self.status = format!("Tersimpan: {}", target.display());
+                self.status = format!("Saved: {}", target.display());
             }
-            Err(e) => self.status = format!("Gagal menyimpan: {e}"),
+            Err(e) => self.status = format!("Could not save: {e}"),
         }
     }
 
@@ -161,7 +161,7 @@ impl App {
 
         egui::Panel::top("bar").show(root, |ui| {
             ui.horizontal(|ui| {
-                if ui.button("Buka… ⌘O").clicked() {
+                if ui.button("Open… ⌘O").clicked() {
                     self.pick_and_open();
                 }
                 if matches!(self.doc, Some(Doc::Word(_))) {
@@ -178,10 +178,10 @@ impl App {
                     ui.separator();
                 }
                 ui.add_enabled_ui(self.doc.is_some(), |ui| {
-                    if ui.button("Simpan ⌘S").clicked() {
+                    if ui.button("Save ⌘S").clicked() {
                         self.save(false);
                     }
-                    if ui.button("Simpan Sebagai… ⇧⌘S").clicked() {
+                    if ui.button("Save As… ⇧⌘S").clicked() {
                         self.save(true);
                     }
                 });
@@ -200,7 +200,7 @@ impl App {
                     ui.separator();
                 }
                 if let Some(Doc::Word(d)) = &self.doc {
-                    ui.label(format!("{} halaman", d.pages));
+                    ui.label(if d.pages == 1 { "1 page".to_string() } else { format!("{} pages", d.pages) });
                     ui.separator();
                 }
                 ui.weak(&self.status);
@@ -209,7 +209,7 @@ impl App {
 
         egui::CentralPanel::default().show(root, |ui| match &mut self.doc {
             None => {
-                ui.centered_and_justified(|ui| ui.heading(format!("Buka atau seret file .{} ke sini", exts().join(" / ."))));
+                ui.centered_and_justified(|ui| ui.heading(format!("Open or drop a .{} file here", exts().join(" / ."))));
             }
             Some(Doc::Word(d)) => docview::show(ui, d, self.zoom),
             Some(Doc::Excel(x)) => {

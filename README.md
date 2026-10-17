@@ -46,7 +46,21 @@ Saving goes to a temp file first, so if something fails halfway, your original i
 
 ---
 
-## Install
+## Install (no Rust, no terminal, no tears)
+
+1. Grab **`mikocok-0.1.0.dmg`** from the [latest release](https://github.com/luthfirahmn09/mikocok/releases/latest). It's universal, so it runs on Apple Silicon *and* Intel Macs.
+2. Open it and drag **mikocokWord** and **mikocokExcel** into **Applications**.
+3. Right-click a `.docx` or `.xlsx` → **Open With** → mikocokWord / mikocokExcel. Want it permanent? Select a file, press `⌘I`, pick the app under **Open with**, hit **Change All…**.
+
+**First launch:** the apps aren't notarized by Apple (that costs $99 a year, and we have noodles to buy), so macOS will clutch its pearls and say it can't verify them. Right-click the app → **Open** → **Open**, once. Still blocked? Run this and move on with your life:
+
+```sh
+xattr -dr com.apple.quarantine /Applications/mikocokWord.app /Applications/mikocokExcel.app
+```
+
+Shortcuts: `⌘O` open, `⌘S` save, `⇧⌘S` save as. You can also drag a file onto the window.
+
+### Build it yourself
 
 Needs macOS and [Rust](https://rustup.rs).
 
@@ -55,13 +69,8 @@ git clone https://github.com/luthfirahmn09/mikocok.git
 cd mikocok
 ./build_app.sh            # builds and installs to ~/Applications
 ./build_app.sh --default  # ...and makes them the default for .docx / .xlsx
+./build_dmg.sh            # builds the universal DMG into dist/
 ```
-
-Then right-click a file → **Open With → mikocokWord / mikocokExcel**, double-click it if you set the defaults, or drag a file onto the window.
-
-If macOS gets dramatic on first launch (the apps are only ad-hoc signed, not blessed by Apple), right-click → Open, once. Peace follows.
-
-Shortcuts: `⌘O` open, `⌘S` save, `⇧⌘S` save as.
 
 ---
 
@@ -94,6 +103,7 @@ cargo run --release -- path/to/file.docx
 | `src/ooxml.rs` | Zip and XML plumbing |
 | `src/fonts.rs` | Borrows system fonts so documents use the fonts Word would |
 | `build_app.sh` | Builds the two `.app` bundles, "Open With" included |
+| `build_dmg.sh` | Wraps them into a universal `.dmg` |
 
 There are unit tests for parsing, edit round-trips, and headless page layout. Visual fidelity against real Word is *best effort*. If a document renders weirdly, open an issue and attach the file. We enjoy a good argument with an ugly document.
 

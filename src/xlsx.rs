@@ -53,7 +53,7 @@ fn parse_ref(r: &str) -> Option<(u32, u32)> {
 impl Xlsx {
     pub fn open(bytes: &[u8]) -> Result<Self, String> {
         let pkg = Package::open(bytes)?;
-        let wb = pkg.get_str("xl/workbook.xml").ok_or("bukan file .xlsx yang valid")?;
+        let wb = pkg.get_str("xl/workbook.xml").ok_or("not a valid .xlsx file")?;
         let rels = pkg.get_str("xl/_rels/workbook.xml.rels").unwrap_or_default();
         let targets = parse_rels(&rels)?;
         let shared = pkg.get_str("xl/sharedStrings.xml").map(|x| parse_shared(&x)).transpose()?.unwrap_or_default();
@@ -70,7 +70,7 @@ impl Xlsx {
             sheets.push(Sheet { name, path, cells, max_row, max_col, edits: HashMap::new() });
         }
         if sheets.is_empty() {
-            return Err("tidak ada worksheet".into());
+            return Err("no worksheets found".into());
         }
         Ok(Self { pkg, sheets })
     }
@@ -83,7 +83,7 @@ impl Xlsx {
         let mut pkg = Package::open(&self.pkg.save()?)?;
         let mut changed = false;
         for s in self.sheets.iter().filter(|s| !s.edits.is_empty()) {
-            let xml = pkg.get_str(&s.path).ok_or("sheet hilang")?;
+            let xml = pkg.get_str(&s.path).ok_or("sheet is missing")?;
             let mut by_row: Edits = BTreeMap::new();
             for (&(r, c), t) in &s.edits {
                 by_row.entry(r).or_default().insert(c, t.clone());

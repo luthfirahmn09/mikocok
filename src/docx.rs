@@ -754,7 +754,7 @@ impl Docx {
 impl Docx {
     pub fn open(bytes: &[u8]) -> Result<Self, String> {
         let pkg = Package::open(bytes)?;
-        let xml = pkg.get_str(DOC).ok_or("bukan file .docx yang valid")?;
+        let xml = pkg.get_str(DOC).ok_or("not a valid .docx file")?;
         let styles = pkg.get_str("word/styles.xml").map(|x| parse_styles(&x)).transpose()?.unwrap_or_default();
         let numbering = pkg.get_str("word/numbering.xml").map(|x| parse_numbering(&x)).transpose()?.unwrap_or_default();
         let (paras, blocks, page) = parse_doc(&xml, &styles, &numbering)?;
@@ -804,7 +804,7 @@ impl Docx {
         }
         let mut pkg = Package::open(&self.pkg.save()?)?;
         if !(edits.is_empty() && inserts.is_empty() && deleted.is_empty()) {
-            let xml = pkg.get_str(DOC).ok_or("document.xml hilang")?;
+            let xml = pkg.get_str(DOC).ok_or("document.xml is missing")?;
             pkg.set(DOC, rewrite(&xml, &edits, &inserts, &deleted)?);
         }
         pkg.save()
@@ -1228,7 +1228,7 @@ fn rewrite(
                             }
                             Event::Empty(e) if e.name().as_ref() == b"w:p" => counter += 1,
                             Event::End(e) if e.name().as_ref() == b"w:p" => depth -= 1,
-                            Event::Eof => return Err("XML tidak lengkap".into()),
+                            Event::Eof => return Err("unexpected end of XML".into()),
                             _ => {}
                         }
                     }
@@ -1358,7 +1358,7 @@ mod tests {
         assert_eq!(d.paras[i].slots[1].text, "SANGAT tebal & <b>");
         // paragraph without runs (empty) receives new text
         let e = d.paras.iter().position(|p| p.slots.is_empty() || p.text.is_empty()).unwrap();
-        d.paras[e].text = "baru".into();
+        d.paras[e].text = "new".into();
         d.paras[e].sync();
         // delete the tab
         let j = d.paras.iter().position(|p| p.text.contains('\t')).unwrap();
@@ -1372,7 +1372,7 @@ mod tests {
         assert_eq!(r.paras[i].text, d.paras[i].text);
         assert_eq!(r.paras[i].slots[1].fmt.bold, Some(true), "bold run survived");
         assert_eq!(r.paras[i].slots[5].fmt.color, Some([0xC0, 0, 0]));
-        assert_eq!(r.paras[e].text, "baru");
+        assert_eq!(r.paras[e].text, "new");
         assert_eq!(r.paras[j].text, "Nama:Budi Santoso");
         assert_eq!(r.media.len(), 1, "image kept");
         assert_eq!(r.paras.len(), d.paras.len());
