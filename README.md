@@ -1,102 +1,102 @@
 # mikocok 🍜
 
-**Pengganti Numbers & Pages, buat yang cuma mau ngedit file kantor doang.**
+**A replacement for Numbers & Pages, for people who just want to edit an office file.**
 
-Pernah nggak, lagi buru-buru, klik dua kali `laporan.xlsx`, terus yang kebuka… **Numbers**? Atau `kontrak.docx` kebuka di **Pages**, terus layout-nya geser seribu piksel dan tabelnya pindah alam?
+You know the moment. You're in a hurry. You double-click `report.xlsx` and what opens is... **Numbers**. Or `contract.docx` lands in **Pages**, where the layout slides a thousand pixels to the left and your table relocates to another dimension.
 
-Nah. Itu dia alasan *mikocok* ada.
+That, friends, is why *mikocok* exists.
 
-Dua aplikasi Mac mungil, sama-sama ±5 MB (iya, MB, bukan GB, cek lagi aja):
+Two tiny Mac apps, about 5 MB each. (That's megabytes. Not gigabytes. Go ahead, check again, we'll wait.)
 
-| App | Gantiin siapa | Urusannya |
+| App | Replaces | Does |
 |---|---|---|
-| **mikocokWord** | Pages (yang nyasar buka `.docx`) | Buka & edit `.docx` |
-| **mikocokExcel** | Numbers (yang nyasar buka `.xlsx`) | Buka & edit `.xlsx` |
+| **mikocokWord** | Pages (the one that wandered into your `.docx`) | Opens & edits `.docx` |
+| **mikocokExcel** | Numbers (the one that wandered into your `.xlsx`) | Opens & edits `.xlsx` |
 
-Nggak perlu Office. Nggak perlu langganan. Nggak perlu login. Nggak ada pop-up "Coba gratis 30 hari". Nggak ada AI yang nawarin "bantu rangkum dokumen ini?" padahal kamu cuma mau benerin typo.
+No Office. No subscription. No login. No "Start your 30-day free trial" popup. No AI assistant offering to *"summarize this document?"* when all you wanted was to fix a typo.
 
-Ditulis pakai Rust + [egui](https://github.com/emilk/egui). Dua-duanya sebenarnya **satu binary yang sama** pakai dua baju beda. Hemat, kan? Ala anak kos.
-
----
-
-## mikocokWord: tampil kayak Word, bukan kayak "kata-kata mutiara"
-
-Dokumen tampil **per halaman**, beneran kertas putih dengan ukuran dan margin sesuai file aslinya, bukan satu scroll panjang tanpa akhir kayak thread Twitter.
-
-- **Halaman asli**: pindah halaman otomatis, page break manual dihormati, ada penghitung halaman, bisa zoom.
-- **Format kebaca semua**: font, ukuran, tebal, miring, garis bawah, coret, warna, highlight, heading, rata kiri-kanan, spasi, indentasi.
-- **Daftar, tabel, gambar**: bullet, penomoran, tabel dengan border dan warna sel, gambar PNG/JPEG.
-- **Ngetik langsung di tempat**: klik, ketik, selesai. Nggak ada mode "edit" yang harus dibuka dulu.
-  - `Enter` bikin paragraf baru (formatnya ikut diwarisin, kayak keturunan).
-  - `Backspace` di awal paragraf = gabung ke paragraf atas.
-  - Panah atas/bawah pindah antar paragraf.
-  - Teks yang kamu ubah **tetap tebal/miring/berwarna** sesuai aslinya.
-
-## mikocokExcel: grid, rumus, tanpa drama
-
-Tabel sel `.xlsx` dengan tab sheet, bar rumus, dan edit langsung di sel. Ketik `=...` jadi rumus, ketik angka jadi angka, ketik curhatan jadi teks. Sesederhana itu.
+Written in Rust with [egui](https://github.com/emilk/egui). Both apps are secretly **the same binary** wearing two different hats. Very sustainable. Very startup.
 
 ---
 
-## File kamu aman (ini serius, bagian paling penting)
+## mikocokWord: looks like Word, not like a ransom note
 
-mikocok **nggak** "buka terus export ulang semuanya" lalu hasilnya jadi dokumen yang mirip tapi bukan. Dia ngedit XML di dalam file dan **cuma nulis ulang bagian yang kamu ubah**. Style, gambar, chart, header/footer, komentar, dan apa pun yang dia nggak ngerti, dibiarin utuh. Prinsipnya: *"nggak ngerti? jangan disentuh."* Filosofi hidup yang bagus juga.
+Documents show up as **actual pages**: white paper, the real page size and margins from your file, not one endless scroll like a Twitter thread.
 
-Pas nyimpan, dia nulis ke file sementara dulu. Kalau gagal di tengah jalan, file aslimu nggak ikut kepotong.
+- **Real pages**: automatic page breaks, manual breaks respected, a page counter, zoom.
+- **Formatting you can see**: fonts, sizes, bold, italic, underline, strikethrough, colors, highlight, headings, justified text, spacing, indents.
+- **Lists, tables, images**: bullets, numbering, tables with borders and shaded cells, PNG/JPEG images.
+- **Type right on the page**: click, type, done. No "enter edit mode" ceremony.
+  - `Enter` makes a new paragraph (it inherits the formatting, like family money).
+  - `Backspace` at the start of a paragraph merges it into the one above.
+  - Arrow keys hop between paragraphs.
+  - Text you change **keeps its bold, italics, and color**, because we have manners.
+
+## mikocokExcel: a grid, formulas, zero drama
+
+A `.xlsx` spreadsheet grid with sheet tabs, a formula bar, and in-place cell editing. Type `=...` and it's a formula. Type a number and it's a number. Type your feelings and they're text. Simple.
 
 ---
 
-## Pasang
+## Your files are safe (the important part, seriously)
 
-Butuh macOS dan [Rust](https://rustup.rs).
+mikocok does **not** "open it, re-export everything, and hand back something that looks vaguely similar." It edits the XML inside the file and **rewrites only what you changed**. Styles, images, charts, headers, footers, comments, and everything else it doesn't understand are left exactly as they were. The policy is: *if you don't understand it, don't touch it.* Good life advice, too.
+
+Saving goes to a temp file first, so if something fails halfway, your original isn't left truncated and sad.
+
+---
+
+## Install
+
+Needs macOS and [Rust](https://rustup.rs).
 
 ```sh
 git clone https://github.com/luthfirahmn09/mikocok.git
 cd mikocok
-./build_app.sh            # build & pasang ke ~/Applications
-./build_app.sh --default  # sekalian jadiin default buat .docx / .xlsx
+./build_app.sh            # builds and installs to ~/Applications
+./build_app.sh --default  # ...and makes them the default for .docx / .xlsx
 ```
 
-Habis itu: klik kanan file → **Buka Dengan → mikocokWord / mikocokExcel**, atau klik dua kali kalau udah dijadiin default, atau seret file ke jendelanya.
+Then right-click a file → **Open With → mikocokWord / mikocokExcel**, double-click it if you set the defaults, or drag a file onto the window.
 
-Kalau macOS rewel di peluncuran pertama (aplikasinya cuma di-sign ad-hoc, bukan sama Apple), klik kanan → Open sekali aja. Habis itu damai.
+If macOS gets dramatic on first launch (the apps are only ad-hoc signed, not blessed by Apple), right-click → Open, once. Peace follows.
 
-Pintasan: `⌘O` buka, `⌘S` simpan, `⇧⌘S` simpan sebagai.
-
----
-
-## Jujur-jujuran: yang belum ada
-
-Ini editor **minimalis**, bukan pembunuh Microsoft Office. Jangan berharap dia bisa bikin pivot table sambil nyeduhin kopi.
-
-- **Word**: belum ada toolbar tebal/miring (format yang udah ada tampil dan terjaga, tapi kamu belum bisa nambah format baru). Belum ada header/footer, kolom, text box, atau track changes. `Shift+Enter` belum jalan. Nomor daftar setelah item baru baru benar setelah file dibuka ulang.
-- **Pembagian halaman** dihitung sama layout mikocok sendiri, jadi bisa beda tipis dari Word: paragraf nggak dipotong antar halaman, dan font yang nggak ada di Mac-mu (misal Calibri tanpa Office) diganti Arial.
-- **Excel**: belum ada chart, format angka/tanggal, tampilan sel gabungan, atau penghitungan rumus. Sel rumus nampilin nilai terakhir yang tersimpan, dan Excel bakal ngitung ulang pas file dibuka di sana.
-- **Gambar**: baru PNG dan JPEG.
-
-Kalau butuh yang lebih dari ini, ya… ada Office. Dia nggak ke mana-mana.
+Shortcuts: `⌘O` open, `⌘S` save, `⇧⌘S` save as.
 
 ---
 
-## Buat yang mau ngoprek
+## Honesty section: what it can't do
+
+This is a **minimal** editor, not a Microsoft killer. Do not expect it to build pivot tables while you make coffee.
+
+- **Word**: no bold/italic/style toolbar yet. Existing formatting is displayed and preserved, but you can't apply new formatting. No headers/footers, columns, text boxes, or track changes. `Shift+Enter` doesn't work. List numbers after a freshly created item only fix themselves when you reopen the file.
+- **Page breaks** come from mikocok's own layout, so they can differ slightly from Word's: paragraphs aren't split across pages, and fonts missing on your Mac (say, Calibri without Office) are swapped for Arial.
+- **Excel**: no charts, number/date formatting, merged-cell display, or formula evaluation. Formula cells show their last saved value, and Excel recalculates when you open the file there.
+- **Images**: PNG and JPEG only.
+
+If you need more than that, well, Office is still out there. It isn't going anywhere. Believe us, we checked.
+
+---
+
+## For the tinkerers
 
 ```sh
-python3 tools/make_samples.py   # bikin file contoh .docx/.xlsx buat test
+python3 tools/make_samples.py   # writes sample .docx/.xlsx fixtures for the tests
 cargo test
-cargo run --release -- path/ke/file.docx
+cargo run --release -- path/to/file.docx
 ```
 
-| File | Isinya |
+| File | What it does |
 |---|---|
-| `src/docx.rs` | Model Word: style, numbering, tabel, parser, dan penulis ulang XML (edit / pecah / gabung paragraf) |
-| `src/docview.rs` | Render halaman, pagination, edit langsung pakai egui |
-| `src/xlsx.rs` | Pembaca Excel dan penulis ulang XML per sel |
-| `src/ooxml.rs` | Urusan zip dan XML |
-| `src/fonts.rs` | Ngambil font sistem biar dokumen pakai font yang Word pakai |
-| `build_app.sh` | Bikin dua `.app` lengkap dengan "Buka Dengan" |
+| `src/docx.rs` | Word model: styles, numbering, tables, parser, and the XML rewriter (edit / split / join paragraphs) |
+| `src/docview.rs` | Page rendering, pagination, in-place editing with egui |
+| `src/xlsx.rs` | Excel reader and per-cell XML rewriter |
+| `src/ooxml.rs` | Zip and XML plumbing |
+| `src/fonts.rs` | Borrows system fonts so documents use the fonts Word would |
+| `build_app.sh` | Builds the two `.app` bundles, "Open With" included |
 
-Ada unit test buat parsing, round-trip edit, sama layout halaman tanpa layar. Kemiripan visual dengan Word asli itu *best effort*. Nemu dokumen yang tampilannya aneh? Buka issue dan lampirin filenya, aku seneng diajak debat sama dokumen jelek.
+There are unit tests for parsing, edit round-trips, and headless page layout. Visual fidelity against real Word is *best effort*. If a document renders weirdly, open an issue and attach the file. We enjoy a good argument with an ugly document.
 
 ---
 
-*mikocok: karena kadang kamu cuma mau benerin satu kata di dokumen, bukan ikut kelas onboarding.*
+*mikocok: because sometimes you just want to fix one word, not attend an onboarding webinar.*
